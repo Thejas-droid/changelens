@@ -1,0 +1,54 @@
+version: 1
+project:
+  name: commerce-service
+  roots:
+    - "."
+languages:
+  - cpp
+  - typescript
+  - python
+tests:
+  frameworks:
+    - googletest
+    - ctest
+    - vitest
+    - pytest
+  patterns:
+    - "**/*_test.cpp"
+    - "**/*.test.ts"
+    - "**/*.spec.ts"
+    - "**/test_*.py"
+  alwaysRun:
+    - "tests/security/**"
+execution:
+  workers: 8
+  timeoutSeconds: 900
+  maxConcurrentRunsPerRepository: 2
+cache:
+  enabled: true
+  ttlSeconds: 604800
+flaky:
+  enabled: true
+  maxRetries: 2
+  quarantine:
+    enabled: false
+fallback:
+  fullSuiteWhenChanged:
+    - "CMakeLists.txt"
+    - "cmake/**"
+    - "package-lock.json"
+    - "pnpm-lock.yaml"
+    - "requirements.txt"
+    - "pyproject.toml"
+    - ".github/workflows/**"
+    - "testgraph.yml"
+validation:
+  auditRate: 0.05
+generated:
+  patterns:
+    - "generated/**"
+ignore:
+  - "build/**"
+  - "dist/**"
+  - "node_modules/**"
+  - ".git/**"

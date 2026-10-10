@@ -1,0 +1,23 @@
+version: 1
+project:
+  name: testgraph-demo-commerce
+  roots:
+    - src
+tests:
+  patterns:
+    - "tests/**/*_test.cpp"
+  alwaysRun:
+    - "tests/auth/**"
+execution:
+  workers: 8
+cache:
+  enabled: true
+flaky:
+  enabled: true
+  maxRetries: 2
+fallback:
+  fullSuiteWhenChanged:
+    - "CMakeLists.txt"
+    - "testgraph.yml"
+ignore:
+  - ".git/**"

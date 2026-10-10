@@ -1,0 +1,30 @@
+version: 1
+project:
+  name: ChangeLens
+  roots:
+    - include
+    - src
+    - demo/testgraph-demo-commerce/src
+tests:
+  patterns:
+    - "tests/unit/*.cpp"
+    - "tests/integration/*.cpp"
+    - "tests/integration/test_*.py"
+    - "demo/**/*_test.cpp"
+fallback:
+  fullSuiteWhenChanged:
+    - "CMakeLists.txt"
+    - "cmake/**"
+    - "testgraph.yml"
+    - ".github/workflows/**"
+ignore:
+  - "build/**"
+  - "node_modules/**"
+  - "**/node_modules/**"
+  - "dist/**"
+  - "**/dist/**"
+  - ".git/**"
+  - "**/.git/**"
+  - ".agents/**"
+  - ".codex/**"
+  - ".aws/**"

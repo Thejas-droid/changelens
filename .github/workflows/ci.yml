@@ -1,0 +1,59 @@
+name: ci
+on:
+  push:
+  pull_request:
+permissions:
+  contents: read
+jobs:
+  cpp:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - name: Dependencies
+        run: sudo apt-get update && sudo apt-get install -y ninja-build libssl-dev libpq-dev libhiredis-dev
+      - name: Configure
+        run: cmake -S . -B build -G Ninja -DCMAKE_BUILD_TYPE=Release
+      - name: Build
+        run: cmake --build build --parallel 2
+      - name: Test
+        run: ctest --test-dir build --output-on-failure
+      - name: HTTP integration
+        run: python3 tests/integration/test_http.py ./build/testgraph-server
+  dashboard:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: web/dashboard
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: web/dashboard/package-lock.json
+      - run: npm ci --no-audit --no-fund
+      - run: npm run build
+  containers:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - name: Validate Compose and build images
+        env:
+          TESTGRAPH_API_TOKEN: ci-integration-token-not-a-deployment-secret-12345
+        run: |
+          docker compose config --quiet
+          docker compose build
+      - name: Smoke deployment
+        env:
+          TESTGRAPH_API_TOKEN: ci-integration-token-not-a-deployment-secret-12345
+        run: |
+          docker compose up -d --wait --wait-timeout 120
+          curl --fail --silent http://127.0.0.1:3000/health/ready
+          curl --fail --silent -H "Authorization: Bearer $TESTGRAPH_API_TOKEN" http://127.0.0.1:3000/api/v1/workspace | python3 -c 'import json,sys; d=json.load(sys.stdin); assert d["filesScanned"] > 0'
+      - name: Logs and cleanup
+        if: always()
+        env:
+          TESTGRAPH_API_TOKEN: ci-integration-token-not-a-deployment-secret-12345
+        run: |
+          docker compose logs --no-color
+          docker compose down

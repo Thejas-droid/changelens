@@ -1,0 +1,13 @@
+.git
+.gitignore
+.agents
+.codex
+.aws
+.env
+.env.*
+!.env.example
+build
+**/node_modules
+**/dist
+**/*.tsbuildinfo
+*.log
